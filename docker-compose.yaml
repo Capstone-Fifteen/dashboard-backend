@@ -1,15 +1,27 @@
 version: '2'
 services:
-  graphql-engine:
-    image: hasura/graphql-engine:latest
-    network_mode: "host"
+  timescale:
+    image: timescale/timescaledb:latest-pg12
     ports:
-      - '8080:8080'
+      - '5432:5432'
     restart: always
     environment:
-      HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:password@localhost:5432/postgres
+      POSTGRES_PASSWORD: password
+    volumes:
+      - db_data:/var/lib/postgresql/data
+  graphql-engine:
+    image: hasura/graphql-engine:latest
+    ports:
+      - '8080:8080'
+    depends_on:
+      - 'timescale'
+    restart: always
+    environment:
+      HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:password@timescale:5432/postgres
       HASURA_GRAPHQL_ACCESS_KEY: Xjb84POExBxidM5gB3tdVrWHK1nqbx9o
     command:
       - graphql-engine
       - serve
       - --enable-console
+volumes:
+  db_data:
