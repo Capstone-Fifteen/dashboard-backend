@@ -17,6 +17,8 @@ services:
       - /usr/app/node_modules
     ports:
       - '3000:3000'
+    environment:
+      PORT: 3000
     depends_on:
       - timescale
   graphql-engine:
