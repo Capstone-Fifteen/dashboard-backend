@@ -18,6 +18,9 @@ const server = net
       if (data[0] === '#') {
         await insertPredictedData(data);
       }
+      if (data[0] === '@') {
+        await insertRawData(data);
+      }
     });
     socket.write('SERVER: Hello! This is server speaking.');
     // socket.end('SERVER: Closing connection now.');
@@ -33,6 +36,10 @@ server.listen(port, () => {
 const insertPredictedData = async (data) => {
   // Packet format: #<position>|<action>|<sync>|<device id>|<timestamp>
   const tokenizedData = data.substr(1).split('|');
+  const deviceTimestamp = tokenizedData[4];
+  const deviceId = tokenizedData[3];
+  const position = tokenizedData[0];
+  const danceMove = tokenizedData[1];
 
   const query = `INSERT INTO predicted_data(
                            prediction_timestamp,
@@ -41,17 +48,53 @@ const insertPredictedData = async (data) => {
                            dance_move
                            ) VALUES ($1, $2, $3, $4);
                            `;
+  const parameter = [deviceTimestamp, deviceId, position, danceMove];
+
+  await pool.query(query, parameter, (error) => {
+    if (error) {
+      console.warn(
+        `Error writing data for Device ID ${tokenizedData[3]} @ ${tokenizedData[4]}`,
+        error
+      );
+    }
+  });
+};
+
+const insertRawData = async (data) => {
+  // Packet format: @<accelerometer data>|<gyroscope data>|<EMG readings>|<device id>|<timestamp>
+  const tokenizedData = data.substr(1).split('|');
+  const deviceTimestamp = tokenizedData[4];
+  const deviceId = tokenizedData[3];
+  const accelerometerData = tokenizedData[0].split(',');
+  const gyroscopeData = tokenizedData[1].split(',');
+
+  const query = `INSERT INTO raw_data(
+                     device_timestamp,
+                     device_id,
+                     x_reading,
+                     y_reading,
+                     z_reading,
+                     pitch_reading,
+                     roll_reading,
+                     yaw_reading
+                     ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+                     `;
   const parameter = [
-    tokenizedData[4],
-    tokenizedData[3],
-    tokenizedData[0],
-    tokenizedData[1],
+    deviceTimestamp,
+    deviceId,
+    accelerometerData[0],
+    accelerometerData[1],
+    accelerometerData[2],
+    gyroscopeData[0],
+    gyroscopeData[1],
+    gyroscopeData[2],
   ];
 
   await pool.query(query, parameter, (error) => {
     if (error) {
       console.warn(
-        `Error writing data for Device ID ${tokenizedData[3]} @ ${tokenizedData[4]}`, error
+        `Error writing data for Device ID ${deviceId} @ ${deviceTimestamp}`,
+        error
       );
     }
   });
