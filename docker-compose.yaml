@@ -19,6 +19,11 @@ services:
       - '3000:3000'
     environment:
       PORT: 3000
+      POSTGRES_HOST: timescale
+      POSTGRES_PORT: 5432
+      POSTGRES_DATABASE: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
     depends_on:
       - timescale
   graphql-engine:

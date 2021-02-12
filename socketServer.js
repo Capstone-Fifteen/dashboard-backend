@@ -3,35 +3,36 @@ const { Pool } = require('pg');
 
 const port = parseInt(process.env.PORT || 3000);
 const pool = new Pool({
-  host: process.env.POSTGRES_HOST,
-  port: process.env.POSTGRES_PORT,
-  database: process.env.POSTGRES_DATABASE,
-  user: process.env.POSTGRES_USER,
-  password: process.env.POSTGRES_PASSWORD
+  host: process.env.POSTGRES_HOST || 'localhost',
+  port: process.env.POSTGRES_PORT || 5432,
+  database: process.env.POSTGRES_DATABASE || 'postgres',
+  user: process.env.POSTGRES_USER || 'postgres',
+  password: process.env.POSTGRES_PASSWORD || 'password',
 });
 
 // Create a server object
-const server = net.createServer((socket) => {
-  socket.on('data', async (res) => {
-    console.log(res)
-    const data = res.toString()
-    if (data[0] === '#') {
-      await insertPredictedData(data)
-    }
+const server = net
+  .createServer((socket) => {
+    socket.on('data', async (res) => {
+      const data = res.toString();
+      if (data[0] === '#') {
+        await insertPredictedData(data);
+      }
+    });
+    socket.write('SERVER: Hello! This is server speaking.');
+    // socket.end('SERVER: Closing connection now.');
+  })
+  .on('error', (err) => {
+    console.error(err);
   });
-  socket.write('SERVER: Hello! This is server speaking.');
-  socket.end('SERVER: Closing connection now.');
-}).on('error', (err) => {
-  console.error(err);
-});
 
 server.listen(port, () => {
-  console.log('Server listening on port ', server.address().port)
-})
+  console.log('Server listening on port ', server.address().port);
+});
 
 const insertPredictedData = async (data) => {
-  // Packet format: #<position>|<action>|<sync>|<dancer id>|<timestamp>
-  const tokenizedData = data.substr(1).split('|')
+  // Packet format: #<position>|<action>|<sync>|<device id>|<timestamp>
+  const tokenizedData = data.substr(1).split('|');
 
   const query = `INSERT INTO predicted_data(
                            prediction_timestamp,
@@ -40,12 +41,18 @@ const insertPredictedData = async (data) => {
                            dance_move
                            ) VALUES ($1, $2, $3, $4);
                            `;
-  const parameter = [tokenizedData[4], tokenizedData[3], tokenizedData[1], tokenizedData[0]]
+  const parameter = [
+    tokenizedData[4],
+    tokenizedData[3],
+    tokenizedData[0],
+    tokenizedData[1],
+  ];
 
   await pool.query(query, parameter, (error) => {
     if (error) {
-      console.warn(`Error writing data for Device ID ${tokenizedData[3]} @ ${tokenizedData[4]}`)
+      console.warn(
+        `Error writing data for Device ID ${tokenizedData[3]} @ ${tokenizedData[4]}`, error
+      );
     }
-    pool.end()
-  })
-}
+  });
+};
