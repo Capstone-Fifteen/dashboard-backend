@@ -36,19 +36,21 @@ server.listen(port, () => {
 const insertPredictedData = async (data) => {
   // Packet format: #<position>|<action>|<sync>|<device id>|<timestamp>
   const tokenizedData = data.substr(1).split('|');
-  const deviceTimestamp = tokenizedData[4];
+  const timestamp = tokenizedData[4];
   const deviceId = tokenizedData[3];
   const position = tokenizedData[0];
   const danceMove = tokenizedData[1];
+  const delay = tokenizedData[2];
 
   const query = `INSERT INTO predicted_data(
-                           prediction_timestamp,
+                           created_at,
                            device_id,
                            dance_position,
-                           dance_move
-                           ) VALUES ($1, $2, $3, $4);
+                           dance_move,
+                           delay
+                           ) VALUES ($1, $2, $3, $4, $5);
                            `;
-  const parameter = [deviceTimestamp, deviceId, position, danceMove];
+  const parameter = [timestamp, deviceId, position, danceMove, delay];
 
   await pool.query(query, parameter, (error) => {
     if (error) {
@@ -63,24 +65,26 @@ const insertPredictedData = async (data) => {
 const insertRawData = async (data) => {
   // Packet format: @<accelerometer data>|<gyroscope data>|<EMG readings>|<device id>|<timestamp>
   const tokenizedData = data.substr(1).split('|');
-  const deviceTimestamp = tokenizedData[4];
+  const timestamp = tokenizedData[4];
   const deviceId = tokenizedData[3];
   const accelerometerData = tokenizedData[0].split(',');
   const gyroscopeData = tokenizedData[1].split(',');
+  const emgReading = tokenizedData[2];
 
   const query = `INSERT INTO raw_data(
-                     device_timestamp,
+                     created_at,
                      device_id,
                      x_reading,
                      y_reading,
                      z_reading,
                      pitch_reading,
                      roll_reading,
-                     yaw_reading
-                     ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+                     yaw_reading,
+                     emg_reading
+                     ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
                      `;
   const parameter = [
-    deviceTimestamp,
+    timestamp,
     deviceId,
     accelerometerData[0],
     accelerometerData[1],
@@ -88,6 +92,7 @@ const insertRawData = async (data) => {
     gyroscopeData[0],
     gyroscopeData[1],
     gyroscopeData[2],
+    emgReading,
   ];
 
   await pool.query(query, parameter, (error) => {
