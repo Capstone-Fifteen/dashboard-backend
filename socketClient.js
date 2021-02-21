@@ -32,7 +32,7 @@ const writeRawData = (client) => {
   client.write(message)
 }
 
-const client = net.createConnection({ port: 3000, host: '***REMOVED***' }, async () => {
+const client = net.createConnection({ port: 3000 }, async () => {
   console.log('Connected to server.');
 
   // Send 20 raw data points at 1 second apart
