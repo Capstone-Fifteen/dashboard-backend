@@ -14,9 +14,12 @@ const generateRandomNumber = (min, max) => {
   return Math.floor(i)
 }
 
+const danceMoves = ['Hair', 'Dab', 'Sidepunch', 'Wipetable', 'Sidekick', 'Point High', 'Gun', 'Listen', 'Finale']
+
 const timer = ms => new Promise(res => setTimeout(res, ms))
 
 const writeRawData = (client) => {
+  // Packet format: @<accelerometer data>|<gyroscope data>|<EMG readings>|<device id>|<timestamp>
   const x_reading = generateRandomFloat(0, 100)
   const y_reading = generateRandomFloat(0, 100)
   const z_reading = generateRandomFloat(0, 100)
@@ -24,23 +27,35 @@ const writeRawData = (client) => {
   const pitch = generateRandomFloat(0, 100)
   const yaw = generateRandomFloat(0, 100)
   const emg_reading = generateRandomNumber(0, 100)
-  const currentTIme = new Date().toISOString()
+  const currentTime = new Date().toISOString()
 
-  const message = `@${x_reading}, ${y_reading}, ${z_reading}|${roll}, ${pitch}, ${yaw}|${emg_reading}|1|${currentTIme}`
+  const message = `@${x_reading}, ${y_reading}, ${z_reading}|${roll}, ${pitch}, ${yaw}|${emg_reading}|2|${currentTime}`
   console.log(message)
 
   client.write(message)
 }
 
-const client = net.createConnection({ port: 3000 }, async () => {
+const writePredictedData = (client) => {
+  // Packet format: #<position>|<action>|<sync>|<device id>|<timestamp>
+  const position = generateRandomNumber(1, 3)
+  const action = danceMoves[generateRandomNumber(0, danceMoves.length)]
+  const sync = generateRandomFloat(-5, 5)
+  const currentTime = new Date().toISOString()
+
+  const message = `#${position}|${action}|${sync}|2|${currentTime}`
+  console.log(message)
+
+  client.write(message)
+}
+
+const client = net.createConnection({ port: 3000, host: '***REMOVED***' }, async () => {
   console.log('Connected to server.');
 
   // Send 20 raw data points at 1 second apart
-  for (let i = 0; i < 10; i++) {
-    // client.write(`#3|dab|3|1|${currentTime}`);
-    // client.write(`@8.21, 10.24, 6.05|10.25, 33.8, 5.85|6|1|${currentTime}`);
-    writeRawData(client)
-    await timer(1000)
+  for (let i = 0; i < 3; i++) {
+    // writeRawData(client)
+    writePredictedData(client)
+    await timer(2000)
   }
   client.end()
 });
