@@ -37,7 +37,7 @@ server.listen(port, () => {
 const insertPredictedData = async (data, socket) => {
   // Packet format: #<position>|<action>|<sync>|<device id>|<timestamp>
   const tokenizedData = data.substr(1).split('|');
-  const timestamp = tokenizedData[4];
+  const timestamp = new Date(tokenizedData[4]).toISOString();
   const deviceId = tokenizedData[3];
   const position = tokenizedData[0];
   const danceMove = tokenizedData[1];
@@ -70,7 +70,7 @@ const insertPredictedData = async (data, socket) => {
 const insertRawData = async (data, socket) => {
   // Packet format: @<accelerometer data>|<gyroscope data>|<EMG readings>|<device id>|<timestamp>
   const tokenizedData = data.substr(1).split('|');
-  const timestamp = tokenizedData[4];
+  const timestamp = new Date(tokenizedData[4]).toISOString();
   const deviceId = tokenizedData[3];
   const accelerometerData = tokenizedData[0].split(',');
   const gyroscopeData = tokenizedData[1].split(',');

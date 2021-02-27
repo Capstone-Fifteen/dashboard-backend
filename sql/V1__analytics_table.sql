@@ -1,7 +1,9 @@
 -- Table of registered wearable (device)
 CREATE TABLE device(
                        id SERIAL PRIMARY KEY,
-                       name VARCHAR(255)
+                       name VARCHAR(255),
+                       created_at TIMESTAMPTZ DEFAULT now(),
+                       updated_at TIMESTAMPTZ DEFAULT now()
 );
 
 COMMENT ON TABLE device IS 'List of registered wearables';

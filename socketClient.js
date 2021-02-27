@@ -27,7 +27,7 @@ const writeRawData = (client) => {
   const pitch = generateRandomFloat(0, 100)
   const yaw = generateRandomFloat(0, 100)
   const emg_reading = generateRandomNumber(0, 100)
-  const currentTime = new Date().toISOString()
+  const currentTime = new Date().getTime()
 
   const message = `@${x_reading}, ${y_reading}, ${z_reading}|${roll}, ${pitch}, ${yaw}|${emg_reading}|2|${currentTime}`
   console.log(message)
@@ -40,7 +40,7 @@ const writePredictedData = (client) => {
   const position = generateRandomNumber(1, 3)
   const action = danceMoves[generateRandomNumber(0, danceMoves.length)]
   const sync = generateRandomFloat(-5, 5)
-  const currentTime = new Date().toISOString()
+  const currentTime = new Date().getTime()
 
   const message = `#${position}|${action}|${sync}|2|${currentTime}`
   console.log(message)
