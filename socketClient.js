@@ -42,13 +42,13 @@ const writePredictedData = (client) => {
   const sync = generateRandomFloat(-5, 5)
   const currentTime = new Date().getTime()
 
-  const message = `#${position}|${action}|${sync}|2|${currentTime}`
+  const message = `#${position}|${action}|${sync}|1|${currentTime}`
   console.log(message)
 
   client.write(message)
 }
 
-const client = net.createConnection({ port: 3000, host: '***REMOVED***' }, async () => {
+const client = net.createConnection({ port: 3000 }, async () => {
   console.log('Connected to server.');
 
   // Send 20 raw data points at 1 second apart

@@ -20,7 +20,7 @@ const server = net
       } else if (data[0] === '@') {
         await insertRawData(data, socket);
       } else {
-        socket.write('ERROR: Invalid packet format!')
+        socket.write('ERROR: Invalid packet format!');
       }
     });
     // socket.write('SERVER: Hello! This is server speaking.');
@@ -37,7 +37,7 @@ server.listen(port, () => {
 const insertPredictedData = async (data, socket) => {
   // Packet format: #<position>|<action>|<sync>|<device id>|<timestamp>
   const tokenizedData = data.substr(1).split('|');
-  const timestamp = new Date(tokenizedData[4]).toISOString();
+  const timestamp = new Date(parseFloat(tokenizedData[4])).toISOString();
   const deviceId = tokenizedData[3];
   const position = tokenizedData[0];
   const danceMove = tokenizedData[1];
@@ -55,13 +55,9 @@ const insertPredictedData = async (data, socket) => {
 
   await pool.query(query, parameter, (error) => {
     if (error) {
-      socket.write(
+      console.log(
         `ERROR: Unable to write data for Device ID ${tokenizedData[3]} @ ${tokenizedData[4]}`,
         error
-      );
-    } else {
-      socket.write(
-        `SUCCESS: Added predicted data for Device ID ${tokenizedData[3]} @ ${tokenizedData[4]}`
       );
     }
   });
@@ -70,7 +66,7 @@ const insertPredictedData = async (data, socket) => {
 const insertRawData = async (data, socket) => {
   // Packet format: @<accelerometer data>|<gyroscope data>|<EMG readings>|<device id>|<timestamp>
   const tokenizedData = data.substr(1).split('|');
-  const timestamp = new Date(tokenizedData[4]).toISOString();
+  const timestamp = new Date(parseFloat(tokenizedData[4])).toISOString();
   const deviceId = tokenizedData[3];
   const accelerometerData = tokenizedData[0].split(',');
   const gyroscopeData = tokenizedData[1].split(',');
@@ -102,13 +98,9 @@ const insertRawData = async (data, socket) => {
 
   await pool.query(query, parameter, (error) => {
     if (error) {
-      socket.write(
-        `ERROR: Unable to write data for Device ID ${deviceId} @ ${deviceTimestamp}`,
+      console.log(
+        `ERROR: Unable to write data for Device ID ${deviceId} @ ${timestamp}`,
         error
-      );
-    } else {
-      socket.write(
-        `SUCCESS: Added raw data for Device ID ${tokenizedData[3]} @ ${tokenizedData[4]}`
       );
     }
   });
