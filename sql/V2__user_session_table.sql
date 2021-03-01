@@ -28,13 +28,11 @@ CREATE TABLE participant(
                             session_id INTEGER REFERENCES session(id),
                             dancer_id INTEGER REFERENCES dancer(id),
                             device_id INTEGER REFERENCES device(id),
-                            initial_position TEXT,
                             expected_moves TEXT,
-                            expected_position TEXT,
+                            expected_positions TEXT,
                             created_at TIMESTAMPTZ DEFAULT now(),
                             PRIMARY KEY(session_id, dancer_id)
 );
 COMMENT ON TABLE participant IS 'Dancer-session relationship';
-COMMENT ON COLUMN participant.initial_position IS 'Initial position of the dancer';
 COMMENT ON COLUMN participant.expected_moves IS 'Expected dance moves (in comma-separated values)';
-COMMENT ON COLUMN participant.expected_position IS 'Expected dance positions (in comma-separated values)';
+COMMENT ON COLUMN participant.expected_positions IS 'Expected dance positions (in comma-separated values)';
