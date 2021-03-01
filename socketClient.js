@@ -60,21 +60,18 @@ const writePredictedData = (client) => {
   client.write(message);
 };
 
-const client = net.createConnection(
-  { port: 3000, host: '***REMOVED***' },
-  async () => {
-    console.log('Connected to server.');
+const client = net.createConnection({ port: 3000 }, async () => {
+  console.log('Connected to server.');
 
-    // Send 20 raw data points at 1 second apart
-    for (let i = 0; i < 50; i++) {
-      writeRawData(client);
-      writePredictedData(client);
-      // eslint-disable-next-line no-await-in-loop
-      await timer(1000);
-    }
-    client.end();
+  // Send 20 raw data points at 1 second apart
+  for (let i = 0; i < 50; i++) {
+    writeRawData(client);
+    writePredictedData(client);
+    // eslint-disable-next-line no-await-in-loop
+    await timer(1000);
   }
-);
+  client.end();
+});
 client.on('error', () => {
   console.log('Error connecting to server.');
 });
