@@ -1,6 +1,8 @@
 // Node.js socket client script
 const net = require('net');
 
+const deviceId = process.argv[2];
+
 const generateRandomFloat = (min, max) => {
   const i = Math.random() * (max - min) + min;
 
@@ -37,7 +39,6 @@ const writeRawData = (client) => {
   const pitch = generateRandomFloat(0, 100);
   const yaw = generateRandomFloat(0, 100);
   const emg_reading = generateRandomNumber(0, 100);
-  const deviceId = generateRandomNumber(1, 3);
   const currentTime = new Date().getTime();
 
   const message = `@${x_reading}, ${y_reading}, ${z_reading}|${roll}, ${pitch}, ${yaw}|${emg_reading}|${deviceId}|${currentTime}`;
@@ -51,7 +52,6 @@ const writePredictedData = (client) => {
   const position = generateRandomNumber(1, 3);
   const action = danceMoves[generateRandomNumber(0, danceMoves.length)];
   const sync = generateRandomFloat(-5, 5);
-  const deviceId = generateRandomNumber(1, 3);
   const currentTime = new Date().getTime();
 
   const message = `#${position}|${action}|${sync}|${deviceId}|${currentTime}`;
@@ -60,18 +60,24 @@ const writePredictedData = (client) => {
   client.write(message);
 };
 
-const client = net.createConnection({ port: 3000 }, async () => {
-  console.log('Connected to server.');
+const client = net.createConnection(
+  { port: 3000, host: process.env.HOST || 'localhost' },
+  async () => {
+    console.log('Connected to server.');
 
-  // Send 20 raw data points at 1 second apart
-  for (let i = 0; i < 50; i++) {
-    writeRawData(client);
-    writePredictedData(client);
-    // eslint-disable-next-line no-await-in-loop
-    await timer(1000);
+    // Send 20 raw data points at 1 second apart
+    for (let i = 0; i < 50; i++) {
+      writeRawData(client);
+
+      if (i % 5 === 0) {
+        writePredictedData(client);
+      }
+      // eslint-disable-next-line no-await-in-loop
+      await timer(1000);
+    }
+    client.end();
   }
-  client.end();
-});
+);
 client.on('error', () => {
   console.log('Error connecting to server.');
 });
