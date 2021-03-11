@@ -1,5 +1,11 @@
-version: '2'
+version: '2.1'
 services:
+  rabbit:
+    image: rabbitmq:3-management-alpine
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+    restart: always
   timescale:
     image: timescale/timescaledb:latest-pg12
     ports:
@@ -20,6 +26,7 @@ services:
     restart: always
     environment:
       PORT: 3000
+      RABBITMQ_HOST: rabbit
       POSTGRES_HOST: timescale
       POSTGRES_PORT: 5432
       POSTGRES_DATABASE: postgres
@@ -27,6 +34,7 @@ services:
       POSTGRES_PASSWORD: password
     depends_on:
       - timescale
+      - rabbit
   graphql-engine:
     image: hasura/graphql-engine:latest
     ports:
@@ -37,9 +45,7 @@ services:
     environment:
       HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:password@timescale:5432/postgres
       HASURA_GRAPHQL_ACCESS_KEY: Xjb84POExBxidM5gB3tdVrWHK1nqbx9o
-    command:
-      - graphql-engine
-      - serve
-      - --enable-console
+    command: graphql-engine serve --enable-console
+
 volumes:
   db_data:
