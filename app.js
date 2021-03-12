@@ -1,8 +1,35 @@
+const net = require('net');
 const amqp = require('amqplib/callback_api');
 const insertPredictedData = require('./src/queries/insertPredictedData');
 const insertRawData = require('./src/queries/insertRawData');
 
 const host = process.env.RABBITMQ_HOST || 'localhost';
+const port = process.env.PORT || '3000';
+
+/**
+ * Backwards compatibility for FPGA interface via socket
+ * Remove once fully migrated to RabbitMQ
+ * @type {Server}
+ */
+const server = net
+  .createServer((socket) => {
+    socket.on('data', async (res) => {
+      const data = res.toString();
+      if (data[0] === '#') {
+        await insertPredictedData(data, socket);
+      } else if (data[0] === '@') {
+        await insertRawData(data, socket);
+      } else {
+        socket.write('ERROR: Invalid packet format!');
+      }
+    });
+  })
+  .on('error', (err) => {
+    console.error(err);
+  });
+server.listen(port, () => {
+  console.log('Server listening on port ', server.address().port);
+});
 
 amqp.connect(`amqp://${host}`, (error0, connection) => {
   if (error0) {
