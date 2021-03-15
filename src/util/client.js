@@ -25,8 +25,6 @@ const danceMoves = [
   'Finale',
 ];
 
-const timer = (ms) => new Promise((res) => setTimeout(res, ms));
-
 const writeRawData = (deviceId) => {
   // Packet format: @<accelerometer data>|<gyroscope data>|<EMG readings>|<device id>|<timestamp>
   const x_reading = generateRandomFloat(0, 100);

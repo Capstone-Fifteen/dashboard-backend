@@ -1,8 +1,7 @@
 const amqp = require('amqplib/callback_api');
+const host = require('./src/config/rabbit');
 const insertPredictedData = require('./src/queries/insertPredictedData');
 const insertRawData = require('./src/queries/insertRawData');
-
-const host = process.env.RABBITMQ_HOST || 'localhost';
 
 amqp.connect(`amqp://${host}`, (error0, connection) => {
   if (error0) {
