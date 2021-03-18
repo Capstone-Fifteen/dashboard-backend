@@ -2,12 +2,14 @@
 CREATE TABLE device(
                        id SERIAL PRIMARY KEY,
                        name VARCHAR(255),
+                       description VARCHAR(255),
                        created_at TIMESTAMPTZ DEFAULT now(),
                        updated_at TIMESTAMPTZ DEFAULT now()
 );
 
 COMMENT ON TABLE device IS 'List of registered wearables';
 COMMENT ON COLUMN device.name IS 'Text identifier of the wearable';
+COMMENT ON COLUMN device.description IS 'Optional description of the wearable';
 
 -- Table of raw sensor data
 CREATE TABLE raw_data(

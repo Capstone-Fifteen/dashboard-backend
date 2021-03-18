@@ -6,6 +6,9 @@ services:
       - '5672:5672'
       - '15672:15672'
     restart: always
+    environment:
+      RABBITMQ_DEFAULT_USER: root
+      RABBITMQ_DEFAULT_PASS: password
   timescale:
     image: timescale/timescaledb:latest-pg12
     ports:
@@ -27,6 +30,8 @@ services:
     environment:
       PORT: 3000
       RABBITMQ_HOST: rabbit
+      RABBITMQ_USER: root
+      RABBITMQ_PASSWORD: password
       POSTGRES_HOST: timescale
       POSTGRES_PORT: 5432
       POSTGRES_DATABASE: postgres
