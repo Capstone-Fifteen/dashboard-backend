@@ -19,8 +19,8 @@ amqp.connect(`amqp://${host}`, (error0, connection) => {
     });
     console.log(' [*] Waiting for messages in %s.', dataQueue);
 
-    // each consumer can only process 1 message at a time
-    channel.prefetch(1);
+    // each consumer can only process 10 message at a time
+    channel.prefetch(10);
 
     channel.consume(
       dataQueue,
@@ -35,10 +35,9 @@ amqp.connect(`amqp://${host}`, (error0, connection) => {
         } else {
           console.log(' [i] %s is an invalid message', data);
         }
-        channel.ack(msg);
       },
       {
-        noAck: false,
+        noAck: true,
       }
     );
   });
