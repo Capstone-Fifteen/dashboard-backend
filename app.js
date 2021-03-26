@@ -12,37 +12,29 @@ amqp.connect(`amqp://${host}`, (error0, connection) => {
       throw error1;
     }
 
-    const rawQueue = 'raw_data';
-    const predictedQueue = 'predicted_data';
+    const dataQueue = 'data_queue';
 
-    channel.assertQueue(rawQueue, {
-      durable: false,
+    channel.assertQueue(dataQueue, {
+      durable: true,
     });
-    console.log(' [*R] Waiting for messages in %s.', rawQueue);
+    console.log(' [*] Waiting for messages in %s.', dataQueue);
 
-    channel.assertQueue(predictedQueue, {
-      durable: false,
-    });
-    console.log(' [*P] Waiting for messages in %s.', predictedQueue);
+    // each consumer can only process 10 message at a time
+    channel.prefetch(10);
 
     channel.consume(
-      rawQueue,
+      dataQueue,
       async (msg) => {
         const data = msg.content.toString();
-        console.log(' [xR] Received %s from %s', data, rawQueue);
-        await insertRawData(data);
-      },
-      {
-        noAck: true,
-      }
-    );
+        console.log(' [x] Received %s from %s', data, dataQueue);
 
-    channel.consume(
-      predictedQueue,
-      async (msg) => {
-        const data = msg.content.toString();
-        console.log(' [xP] Received %s from %s', data, predictedQueue);
-        await insertPredictedData(data);
+        if (data[0] === '@') {
+          await insertRawData(data);
+        } else if (data[0] === '#') {
+          await insertPredictedData(data);
+        } else {
+          console.log(' [i] %s is an invalid message', data);
+        }
       },
       {
         noAck: true,
