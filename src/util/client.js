@@ -1,6 +1,10 @@
 const amqp = require('amqplib/callback_api');
 const host = require('../config/rabbit');
 
+/**
+ * Test Script for RabbitMQ
+ */
+
 const generateRandomFloat = (min, max) => {
   const i = Math.random() * (max - min) + min;
 
@@ -13,6 +17,11 @@ const generateRandomNumber = (min, max) => {
 
   return Math.floor(i);
 };
+
+const sleep = (ms) =>
+  new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
 
 const danceMoves = [
   'Hair',
@@ -50,57 +59,53 @@ const writePredictedData = (deviceId) => {
   return `#${position}|${action}|${sync}|${deviceId}|${currentTime}`;
 };
 
-for (let i = 0; i < 30; i++) {
-  amqp.connect(`amqp://${host}`, (error0, connection) => {
-    if (error0) {
-      throw error0;
-    }
-    connection.createChannel(async (error1, channel) => {
-      if (error1) {
-        throw error1;
+const main = async () => {
+  for (let i = 0; i < 1000; i++) {
+    amqp.connect(`amqp://${host}`, (error0, connection) => {
+      if (error0) {
+        throw error0;
       }
+      connection.createChannel(async (error1, channel) => {
+        if (error1) {
+          throw error1;
+        }
 
-      const rawQueue = 'raw_data';
-      const predictedQueue = 'predicted_data';
+        const queue = 'data_queue';
 
-      channel.assertQueue(rawQueue, {
-        durable: false,
-      });
+        const message1 = writeRawData(1);
+        const message2 = writeRawData(2);
+        const message3 = writeRawData(3);
 
-      channel.assertQueue(predictedQueue, {
-        durable: false,
-      });
-
-      const message1 = writeRawData(1);
-      const message2 = writeRawData(2);
-      const message3 = writeRawData(3);
-
-      channel.sendToQueue(rawQueue, Buffer.from(message1));
-      console.log(' [x] Sent %s', message1);
-
-      channel.sendToQueue(rawQueue, Buffer.from(message2));
-      console.log(' [x] Sent %s', message2);
-
-      channel.sendToQueue(rawQueue, Buffer.from(message3));
-      console.log(' [x] Sent %s', message3);
-
-      if (i % 10 === 0) {
-        const messageA = writePredictedData(1);
-        const messageB = writePredictedData(2);
-        const messageC = writePredictedData(3);
-
-        channel.sendToQueue(predictedQueue, Buffer.from(messageA));
+        channel.sendToQueue(queue, Buffer.from(message1));
         console.log(' [x] Sent %s', message1);
 
-        channel.sendToQueue(predictedQueue, Buffer.from(messageB));
+        channel.sendToQueue(queue, Buffer.from(message2));
         console.log(' [x] Sent %s', message2);
 
-        channel.sendToQueue(predictedQueue, Buffer.from(messageC));
+        channel.sendToQueue(queue, Buffer.from(message3));
         console.log(' [x] Sent %s', message3);
-      }
+
+        if (i % 100 === 0) {
+          const messageA = writePredictedData(1);
+          const messageB = writePredictedData(2);
+          const messageC = writePredictedData(3);
+
+          channel.sendToQueue(queue, Buffer.from(messageA));
+          console.log(' [x] Sent %s', messageA);
+
+          channel.sendToQueue(queue, Buffer.from(messageB));
+          console.log(' [x] Sent %s', messageB);
+
+          channel.sendToQueue(queue, Buffer.from(messageC));
+          console.log(' [x] Sent %s', messageC);
+        }
+      });
+      setTimeout(() => {
+        connection.close();
+      }, 500);
     });
-    setTimeout(() => {
-      connection.close();
-    }, 500);
-  });
-}
+    await sleep(50);
+  }
+};
+
+main();
