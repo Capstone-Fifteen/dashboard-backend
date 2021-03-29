@@ -45,7 +45,7 @@ amqp.connect(`amqp://${host}`, (error0, connection) => {
         }
       },
       {
-        noAck: dataType === PREDICTED_DATA, // use manual ack for predicted data queue
+        noAck: dataType === SENSOR_DATA, // use manual ack for predicted data queue
       }
     );
   });
