@@ -1,0 +1,7 @@
+const SENSOR_DATA = 'SENSOR_DATA';
+const PREDICTED_DATA = 'PREDICTED_DATA';
+
+module.exports = {
+  SENSOR_DATA,
+  PREDICTED_DATA,
+};

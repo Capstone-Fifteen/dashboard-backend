@@ -25,7 +25,7 @@ CREATE TABLE raw_data(
                          PRIMARY KEY(created_at, device_id)
 );
 SELECT create_hypertable('raw_data', 'created_at');
-COMMENT ON TABLE raw_data IS 'Raw data from accelerometer and gyroscope';
+COMMENT ON TABLE raw_data IS 'Sensor data from accelerometer and gyroscope';
 COMMENT ON COLUMN raw_data.device_id IS 'Unique identifier of wearable';
 COMMENT ON COLUMN raw_data.x_reading IS 'Accelerometer reading at X-axis';
 COMMENT ON COLUMN raw_data.y_reading IS 'Accelerometer reading at Y-axis';
@@ -45,7 +45,7 @@ CREATE TABLE predicted_data(
                                PRIMARY KEY(created_at, device_id)
 );
 SELECT create_hypertable('predicted_data', 'created_at');
-COMMENT ON TABLE predicted_data IS 'Raw data from accelerometer and gyroscope';
+COMMENT ON TABLE predicted_data IS 'Predicted data from machine learning';
 COMMENT ON COLUMN predicted_data.device_id IS 'Unique identifier of wearable';
 COMMENT ON COLUMN predicted_data.dance_position IS 'Predicted position of dancer';
 COMMENT ON COLUMN predicted_data.dance_move IS 'Predicted dance move of dancer';
