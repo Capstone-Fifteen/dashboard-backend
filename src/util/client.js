@@ -60,7 +60,7 @@ const writePredictedData = (deviceId) => {
 };
 
 const main = async () => {
-  for (let i = 0; i < 1000; i++) {
+  for (let i = 0; i < 10; i++) {
     amqp.connect(`amqp://${host}`, (error0, connection) => {
       if (error0) {
         throw error0;
@@ -84,8 +84,16 @@ const main = async () => {
 
         channel.sendToQueue(queue, Buffer.from(message3));
         console.log(' [x] Sent %s', message3);
+      });
 
-        if (i % 100 === 0) {
+      if (i % 10 === 0) {
+        connection.createChannel(async (error1, channel) => {
+          if (error1) {
+            throw error1;
+          }
+
+          const queue = 'predicted_queue';
+
           const messageA = writePredictedData(1);
           const messageB = writePredictedData(2);
           const messageC = writePredictedData(3);
@@ -98,8 +106,8 @@ const main = async () => {
 
           channel.sendToQueue(queue, Buffer.from(messageC));
           console.log(' [x] Sent %s', messageC);
-        }
-      });
+        });
+      }
       setTimeout(() => {
         connection.close();
       }, 500);
