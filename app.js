@@ -8,13 +8,13 @@ const insertRawData = require('./src/queries/insertRawData');
 // Type is either SENSOR_DATA or PREDICTED_DATA
 const dataType = process.env.DATA_TYPE;
 
-amqp.connect(`amqp://${host}`, (error0, connection) => {
-  if (error0) {
-    throw error0;
+amqp.connect(`amqp://${host}`, (errorConn, connection) => {
+  if (errorConn) {
+    throw errorConn;
   }
-  connection.createChannel((error1, channel) => {
-    if (error1) {
-      throw error1;
+  connection.createChannel((errorChn, channel) => {
+    if (errorChn) {
+      throw errorChn;
     }
 
     const queue = queueName[dataType];

@@ -1,13 +1,21 @@
 const pool = require('../config/postgres');
+const timestampCorrection = require('../util/timestampCorrection');
 
+/**
+ * Database interface for insertion of predicted data
+ * @param data
+ * @returns {Promise<void>}
+ */
 const insertPredictedData = async (data) => {
   // Packet format: #<position>|<action>|<sync>|<device id>|<timestamp>
   const tokenizedData = data.substr(1).split('|');
-  const timestamp = new Date(parseFloat(tokenizedData[4])).toISOString();
+  const receivedTimestamp = new Date(parseFloat(tokenizedData[4]));
   const deviceId = tokenizedData[3];
   const position = tokenizedData[0];
   const danceMove = tokenizedData[1];
   const delay = tokenizedData[2];
+
+  const timestamp = timestampCorrection(receivedTimestamp);
 
   const query = `INSERT INTO predicted_data(
                            created_at,

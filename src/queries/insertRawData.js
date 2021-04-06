@@ -1,13 +1,21 @@
 const pool = require('../config/postgres');
+const timestampCorrection = require('../util/timestampCorrection');
 
+/**
+ * Database interface for insertion of sensor data
+ * @param data
+ * @returns {Promise<void>}
+ */
 const insertRawData = async (data) => {
   // Packet format: @<accelerometer data>|<gyroscope data>|<EMG readings>|<device id>|<timestamp>
   const tokenizedData = data.substr(1).split('|');
-  const timestamp = new Date(parseFloat(tokenizedData[4])).toISOString();
+  const receivedTimestamp = new Date(parseFloat(tokenizedData[4]));
   const deviceId = tokenizedData[3];
   const accelerometerData = tokenizedData[0].split(',');
   const gyroscopeData = tokenizedData[1].split(',');
   const emgReading = tokenizedData[2];
+
+  const timestamp = timestampCorrection(receivedTimestamp);
 
   const query = `INSERT INTO raw_data(
                      created_at,
