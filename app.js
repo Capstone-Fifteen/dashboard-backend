@@ -4,6 +4,9 @@ const queueName = require('./src/config/queueName');
 const { SENSOR_DATA, PREDICTED_DATA } = require('./src/config/dataType');
 const insertPredictedData = require('./src/queries/insertPredictedData');
 const insertRawData = require('./src/queries/insertRawData');
+const packageJson = require('./package.json');
+
+console.log(`Server version: ${packageJson.version}`);
 
 // Type is either SENSOR_DATA or PREDICTED_DATA
 const dataType = process.env.DATA_TYPE;
