@@ -1,0 +1,32 @@
+name: Deploy to GCR
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+    deploy:
+        name: Setup GCloud Account
+        runs-on: ubuntu-latest
+        env:
+          IMAGE_NAME: asia.gcr.io/${{ secrets.GCP_PROJECT_ID }}/server:latest
+        steps:
+
+        - name: Login
+          uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+          with:
+            GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+            service_account_email: ${{ secrets.GCP_EMAIL }}
+            service_account_key: ${{ secrets.GCP_CREDENTIALS }}
+
+        - name: Configure Docker
+          run: gcloud auth configure-docker --quiet
+
+        - name: Checkout
+          uses: actions/checkout@v2
+
+        - name: Build Docker image
+          run: docker build . -t $IMAGE_NAME
+
+        - name: Push Docker image
+          run: docker push $IMAGE_NAME
