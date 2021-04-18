@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "amqplib": "^0.7.1",
+    "crypto-js": "^4.0.0",
     "pg": "^8.5.1"
   },
   "devDependencies": {

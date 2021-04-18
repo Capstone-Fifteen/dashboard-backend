@@ -2,6 +2,7 @@ const amqp = require('amqplib/callback_api');
 const host = require('./src/config/rabbit');
 const queueName = require('./src/config/queueName');
 const { SENSOR_DATA, PREDICTED_DATA } = require('./src/config/dataType');
+const decryptString = require('./src/util/decryptString');
 const insertPredictedData = require('./src/queries/insertPredictedData');
 const insertRawData = require('./src/queries/insertRawData');
 const packageJson = require('./package.json');
@@ -35,15 +36,16 @@ amqp.connect(`amqp://${host}`, (errorConn, connection) => {
       async (msg) => {
         const data = msg.content.toString();
         console.log(' [x] Received %s from %s', data, queue);
+        const decryptedData = decryptString(data);
 
         // Only predicted data should be reliable; sensor data can be dropped
-        if (dataType === SENSOR_DATA && data[0] === '@') {
+        if (dataType === SENSOR_DATA && decryptedData[0] === '@') {
           await insertRawData(data);
-        } else if (dataType === PREDICTED_DATA && data[0] === '#') {
+        } else if (dataType === PREDICTED_DATA && decryptedData[0] === '#') {
           await insertPredictedData(data);
           channel.ack(msg);
         } else {
-          console.log(' [i] %s is an invalid message', data);
+          console.log(' [i] %s is an invalid message', decryptedData);
           if (dataType === PREDICTED_DATA) channel.reject(msg);
         }
       },

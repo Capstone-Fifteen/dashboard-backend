@@ -16,7 +16,7 @@ services:
       POSTGRES_PASSWORD: password
     volumes:
       - db_data:/var/lib/postgresql/data
-  server:
+  server_sensor:
     build: .
     command: npm run start
     volumes:
@@ -34,6 +34,31 @@ services:
       POSTGRES_DATABASE: postgres
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
+      DATA_TYPE: SENSOR_DATA
+      AES_SECRET: 133BBB3212332231
+    depends_on:
+      - timescale
+      - rabbit
+  server_prediction:
+    build: .
+    command: npm run start
+    volumes:
+      - .:/usr/app/
+      - /usr/app/node_modules
+    ports:
+      - '3001:3001'
+    environment:
+      PORT: 3001
+      RABBITMQ_HOST: rabbit
+      RABBITMQ_USER: root
+      RABBITMQ_PASSWORD: password
+      POSTGRES_HOST: timescale
+      POSTGRES_PORT: 5432
+      POSTGRES_DATABASE: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      DATA_TYPE: PREDICTED_DATA
+      AES_SECRET: 133BBB3212332231
     depends_on:
       - timescale
       - rabbit
